@@ -7,6 +7,14 @@ export async function createTranscript(workspaceId: string, rawText: string) {
   return localRepo.createTranscript(workspaceId, rawText);
 }
 
+export async function listTranscripts(workspaceId: string, limit?: number) {
+  return localRepo.listTranscripts(workspaceId, limit);
+}
+
+export async function getTranscriptDetail(workspaceId: string, transcriptId: string) {
+  return localRepo.getTranscriptDetail(workspaceId, transcriptId);
+}
+
 export async function getIdempotencyResult(key: string) {
   return localRepo.getIdempotencyResult(key);
 }

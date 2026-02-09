@@ -8,6 +8,7 @@ import {
   type DerivedCommitResult,
   type PersistenceRepository,
   type TodoRecord,
+  type TranscriptDetail,
   type TranscriptRecord,
 } from "@/server/repositories/types";
 
@@ -62,6 +63,29 @@ export class LocalPersistenceRepository implements PersistenceRepository {
     db.transcripts.push(record);
     await saveDb(db);
     return record;
+  }
+
+  async listTranscripts(workspaceId: string, limit = 20) {
+    const db = await loadDb();
+    return db.transcripts
+      .filter((t) => t.workspaceId === workspaceId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, limit);
+  }
+
+  async getTranscriptDetail(workspaceId: string, transcriptId: string): Promise<TranscriptDetail | null> {
+    const db = await loadDb();
+    const transcript = db.transcripts.find(
+      (t) => t.workspaceId === workspaceId && t.id === transcriptId,
+    );
+
+    if (!transcript) return null;
+
+    const todos = db.todos
+      .filter((t) => t.workspaceId === workspaceId && t.transcriptId === transcriptId)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+    return { transcript, todos };
   }
 
   async getIdempotencyResult(key: string) {

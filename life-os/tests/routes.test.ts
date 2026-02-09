@@ -4,6 +4,8 @@ import test from "node:test";
 import { POST as parsePost } from "@/app/api/transcripts/parse/route";
 import { POST as createPost } from "@/app/api/transcripts/create/route";
 import { POST as commitPost } from "@/app/api/transcripts/commit-derived/route";
+import { GET as listGet } from "@/app/api/transcripts/route";
+import { GET as detailGet } from "@/app/api/transcripts/[id]/route";
 import { __resetLocalDbForTests } from "@/server/local-db";
 import { __resetRepositoryForTests } from "@/server/repositories";
 
@@ -71,4 +73,23 @@ test("transcript create -> parse -> commit flow", async () => {
   const replay = (await replayRes.json()) as { auditEventId: string; committedTodos: number };
   assert.equal(replay.auditEventId, committed.auditEventId);
   assert.equal(replay.committedTodos, 1);
+
+  const listRes = await listGet(
+    new Request("http://localhost/api/transcripts?workspaceId=ws-test&limit=5"),
+  );
+  const listed = (await listRes.json()) as { transcripts: Array<{ id: string }> };
+  assert.equal(listed.transcripts.length, 1);
+  assert.equal(listed.transcripts[0]?.id, created.id);
+
+  const detailRes = await detailGet(
+    new Request(`http://localhost/api/transcripts/${created.id}?workspaceId=ws-test`),
+    { params: Promise.resolve({ id: created.id }) },
+  );
+  const detail = (await detailRes.json()) as {
+    transcript: { id: string };
+    todos: Array<{ title: string }>;
+  };
+  assert.equal(detail.transcript.id, created.id);
+  assert.equal(detail.todos.length, 1);
+  assert.equal(detail.todos[0]?.title, "Task");
 });

@@ -9,6 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "migration:check": "test -d supabase/migrations && ls -1 supabase/migrations/*.sql >/dev/null",
+    "migration:structure-check": "test -d supabase/migrations && test -d supabase/tests/rls && test -f supabase/tests/rls/README.md",
+    "migration:rls-placeholder-check": "grep -R \"enable row level security\" supabase/migrations/*.sql >/dev/null",
     "test": "tsx --test tests/**/*.test.ts"
   },
   "dependencies": {

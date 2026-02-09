@@ -5,6 +5,7 @@ import {
   type CommitTodosParams,
   type DerivedCommitResult,
   type PersistenceRepository,
+  type TranscriptDetail,
   type TranscriptRecord,
 } from "@/server/repositories/types";
 
@@ -66,6 +67,71 @@ export class SupabasePersistenceRepository implements PersistenceRepository {
       workspaceId: data.workspace_id,
       rawText: data.raw_text,
       createdAt: data.created_at,
+    };
+  }
+
+  async listTranscripts(workspaceId: string, limit = 20): Promise<TranscriptRecord[]> {
+    const { data, error } = await this.supabase
+      .from("transcripts")
+      .select("id, workspace_id, raw_text, created_at")
+      .eq("workspace_id", workspaceId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      workspaceId: row.workspace_id,
+      rawText: row.raw_text,
+      createdAt: row.created_at,
+    }));
+  }
+
+  async getTranscriptDetail(workspaceId: string, transcriptId: string): Promise<TranscriptDetail | null> {
+    const { data: transcript, error: transcriptError } = await this.supabase
+      .from("transcripts")
+      .select("id, workspace_id, raw_text, created_at")
+      .eq("workspace_id", workspaceId)
+      .eq("id", transcriptId)
+      .maybeSingle();
+
+    if (transcriptError) throw transcriptError;
+    if (!transcript) return null;
+
+    const { data: todos, error: todoError } = await this.supabase
+      .from("todos")
+      .select(
+        "id, workspace_id, transcript_id, title, horizon, energy, context, money_cost, domain, responsible, due_date, notes, created_at",
+      )
+      .eq("workspace_id", workspaceId)
+      .eq("transcript_id", transcriptId)
+      .order("created_at", { ascending: true });
+
+    if (todoError) throw todoError;
+
+    return {
+      transcript: {
+        id: transcript.id,
+        workspaceId: transcript.workspace_id,
+        rawText: transcript.raw_text,
+        createdAt: transcript.created_at,
+      },
+      todos: (todos ?? []).map((row) => ({
+        id: row.id,
+        workspaceId: row.workspace_id,
+        transcriptId: row.transcript_id,
+        title: row.title,
+        horizon: row.horizon,
+        energy: row.energy,
+        context: row.context,
+        moneyCost: row.money_cost,
+        domain: row.domain,
+        responsible: row.responsible,
+        dueDate: row.due_date,
+        notes: row.notes,
+        createdAt: row.created_at,
+      })),
     };
   }
 
