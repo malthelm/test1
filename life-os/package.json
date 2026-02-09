@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "migration:check": "echo 'migration check placeholder (Supabase migrations to be added in Phase 1)'"
+    "migration:check": "echo 'migration check placeholder (Supabase migrations to be added in Phase 1)'",
+    "test": "tsx --test tests/**/*.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
@@ -30,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

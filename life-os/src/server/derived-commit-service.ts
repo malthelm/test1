@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 
 import { type ParsedTodoLine } from "@/lib/transcripts/parser";
+import { commitTodosAndAudit } from "@/server/local-db";
 
 export type CommitRequest = {
   workspaceId: string;
@@ -26,11 +27,10 @@ export async function commitDerivedFromTranscript(
       .update(`${req.workspaceId}:${req.transcriptId}:${JSON.stringify(req.todos)}`)
       .digest("hex");
 
-  // TODO: Replace with real DB transaction + idempotency table + audit_events insert.
-  return {
+  return commitTodosAndAudit({
+    workspaceId: req.workspaceId,
+    transcriptId: req.transcriptId,
+    todos: req.todos,
     idempotencyKey,
-    committedTodos: req.todos.length,
-    skippedTodos: 0,
-    auditEventId: crypto.randomUUID(),
-  };
+  });
 }
