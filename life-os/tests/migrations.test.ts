@@ -36,6 +36,25 @@ test("phase 1 follow-up migration hardens commit rpc + adds write policy scaffol
   assert.match(sql, /create policy todos_member_insert/i);
 });
 
+test("phase 1 role-based policy migration defines role helpers + write/update/delete policies", async () => {
+  const files = await fs.readdir(migrationsDir);
+  const rolePolicies = files.find((file) => file.includes("phase1_role_based_write_policies"));
+
+  assert.ok(rolePolicies, "expected role-based write policy migration file");
+
+  const sql = await fs.readFile(path.join(migrationsDir, rolePolicies), "utf8");
+
+  assert.match(sql, /create or replace function public\.workspace_role_rank/i);
+  assert.match(sql, /create or replace function public\.user_has_workspace_role_at_least/i);
+
+  assert.match(sql, /create policy transcripts_member_update/i);
+  assert.match(sql, /create policy transcripts_owner_delete/i);
+  assert.match(sql, /create policy todos_member_update/i);
+  assert.match(sql, /create policy todos_owner_delete/i);
+  assert.match(sql, /create policy memberships_owner_update/i);
+  assert.match(sql, /create policy memberships_owner_delete/i);
+});
+
 test("RLS matrix starter covers all core workspace-scoped tables", async () => {
   const matrixPath = path.join(rlsDir, "policy-matrix-starter.json");
   const raw = await fs.readFile(matrixPath, "utf8");

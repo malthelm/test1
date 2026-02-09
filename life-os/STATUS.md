@@ -2,6 +2,24 @@
 
 ## Shipped in this run (2026-02-09)
 
+### 0) Role-based write policy hardening (owner/member/viewer)
+
+- Added migration:
+  - `supabase/migrations/20260209163000_phase1_role_based_write_policies.sql`
+- Introduced role helper functions for deterministic policy comparisons:
+  - `public.workspace_role_rank(role text)`
+  - `public.user_has_workspace_role_at_least(workspace_id text, min_role text)`
+- Replaced permissive insert-only write scaffold with role-aware policy definitions across core tables:
+  - `workspaces`: owner insert/update/delete gates
+  - `workspace_memberships`: owner insert/update/delete gates
+  - `transcripts`: member insert/update, owner delete
+  - `todos`: member insert/update, owner delete
+  - `audit_events`: member insert (append-only)
+  - `idempotency_keys`: member insert (append-only)
+- Expanded migration tests (`tests/migrations.test.ts`) with assertions for:
+  - new role helper functions
+  - update/delete policy coverage for transcripts/todos/memberships
+
 ### 1) RLS policy scaffolding expanded + migration test/matrix starter
 
 - Added follow-up migration:
@@ -48,6 +66,6 @@
 ## Next steps
 
 1. Replace marker-based migration assertions with executable Supabase/pgTAP RLS tests, seeded by `policy-matrix-starter.json`.
-2. Tighten write policies by role (owner/member/viewer) and add update/delete policy definitions per table.
+2. Add executable Supabase/pgTAP RLS tests for owner/member/viewer allow+deny cases using seeded fixtures.
 3. Add TODO edit/diff controls in review UI before commit (field-level correction loop).
 4. Move workspace/user context to auth claims/session server-side and remove client-supplied workspace ID for protected routes.
