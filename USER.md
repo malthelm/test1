@@ -3,9 +3,12 @@
 _Learn about the person you're helping. Update this as you go._
 
 - **Name:**
+  Malthe
 - **What to call them:**
+  Malthe
 - **Pronouns:** _(optional)_
 - **Timezone:**
+  Europe/Copenhagen
 - **Notes:**
   - Wants a lovingly personal assistant focused on building a highly automated life for them and their partner.
 
