@@ -5,22 +5,22 @@ import { getPersistenceRepository } from "@/server/repositories";
 import { getRequestContext } from "@/server/request-context";
 
 const querySchema = z.object({
-  limit: z.coerce.number().int().positive().max(100).default(20),
+  limit: z.coerce.number().int().positive().max(500).default(100),
 });
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const parsedQuery = querySchema.safeParse({
+  const parsed = querySchema.safeParse({
     limit: searchParams.get("limit") ?? undefined,
   });
 
-  if (!parsedQuery.success) {
+  if (!parsed.success) {
     return NextResponse.json({ error: "Invalid query" }, { status: 400 });
   }
 
-  const repository = getPersistenceRepository();
   const { workspaceId } = getRequestContext(req);
-  const transcripts = await repository.listTranscripts(workspaceId, parsedQuery.data.limit);
+  const repository = getPersistenceRepository();
+  const todos = await repository.listTodos(workspaceId, parsed.data.limit);
 
-  return NextResponse.json({ transcripts });
+  return NextResponse.json({ todos });
 }

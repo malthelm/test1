@@ -73,6 +73,14 @@ export class LocalPersistenceRepository implements PersistenceRepository {
       .slice(0, limit);
   }
 
+  async listTodos(workspaceId: string, limit = 50) {
+    const db = await loadDb();
+    return db.todos
+      .filter((t) => t.workspaceId === workspaceId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, limit);
+  }
+
   async getTranscriptDetail(workspaceId: string, transcriptId: string): Promise<TranscriptDetail | null> {
     const db = await loadDb();
     const transcript = db.transcripts.find(

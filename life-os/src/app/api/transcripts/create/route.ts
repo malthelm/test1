@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getPersistenceRepository } from "@/server/repositories";
+import { getRequestContext } from "@/server/request-context";
 
 const bodySchema = z.object({
-  workspaceId: z.string().min(1),
   rawText: z.string().min(1),
 });
 
@@ -17,10 +17,8 @@ export async function POST(req: Request) {
   }
 
   const repository = getPersistenceRepository();
-  const transcript = await repository.createTranscript(
-    parsedBody.data.workspaceId,
-    parsedBody.data.rawText,
-  );
+  const { workspaceId } = getRequestContext(req);
+  const transcript = await repository.createTranscript(workspaceId, parsedBody.data.rawText);
 
   return NextResponse.json(transcript);
 }

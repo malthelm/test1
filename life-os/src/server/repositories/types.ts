@@ -55,6 +55,7 @@ export type TranscriptDetail = {
 export interface PersistenceRepository {
   createTranscript(workspaceId: string, rawText: string): Promise<TranscriptRecord>;
   listTranscripts(workspaceId: string, limit?: number): Promise<TranscriptRecord[]>;
+  listTodos(workspaceId: string, limit?: number): Promise<TodoRecord[]>;
   getTranscriptDetail(workspaceId: string, transcriptId: string): Promise<TranscriptDetail | null>;
   getIdempotencyResult(key: string): Promise<DerivedCommitResult | null>;
   commitTodosAndAudit(params: CommitTodosParams): Promise<DerivedCommitResult>;

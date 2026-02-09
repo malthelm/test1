@@ -88,6 +88,35 @@ export class SupabasePersistenceRepository implements PersistenceRepository {
     }));
   }
 
+  async listTodos(workspaceId: string, limit = 50) {
+    const { data, error } = await this.supabase
+      .from("todos")
+      .select(
+        "id, workspace_id, transcript_id, title, horizon, energy, context, money_cost, domain, responsible, due_date, notes, created_at",
+      )
+      .eq("workspace_id", workspaceId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      workspaceId: row.workspace_id,
+      transcriptId: row.transcript_id,
+      title: row.title,
+      horizon: row.horizon,
+      energy: row.energy,
+      context: row.context,
+      moneyCost: row.money_cost,
+      domain: row.domain,
+      responsible: row.responsible,
+      dueDate: row.due_date,
+      notes: row.notes,
+      createdAt: row.created_at,
+    }));
+  }
+
   async getTranscriptDetail(workspaceId: string, transcriptId: string): Promise<TranscriptDetail | null> {
     const { data: transcript, error: transcriptError } = await this.supabase
       .from("transcripts")

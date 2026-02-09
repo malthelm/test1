@@ -12,6 +12,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <Link href="/dashboard" className="hover:underline">
               Dashboard
             </Link>
+            <Link href="/todos" className="hover:underline">
+              Todos
+            </Link>
+            <Link href="/timeline" className="hover:underline">
+              Timeline
+            </Link>
+            <Link href="/weekly-plan" className="hover:underline">
+              Weekly Plan
+            </Link>
             <Link href="/transcripts/new" className="hover:underline">
               New Transcript
             </Link>

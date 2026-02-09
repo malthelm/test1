@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { commitDerivedFromTranscript } from "@/server/derived-commit-service";
+import { getRequestContext } from "@/server/request-context";
 
 const todoSchema = z.object({
   raw: z.string(),
@@ -19,7 +20,6 @@ const todoSchema = z.object({
 });
 
 const bodySchema = z.object({
-  workspaceId: z.string().min(1),
   transcriptId: z.string().min(1),
   todos: z.array(todoSchema),
   idempotencyKey: z.string().optional(),
@@ -33,6 +33,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
-  const result = await commitDerivedFromTranscript(parsedBody.data);
+  const { workspaceId } = getRequestContext(req);
+  const result = await commitDerivedFromTranscript({
+    workspaceId,
+    transcriptId: parsedBody.data.transcriptId,
+    todos: parsedBody.data.todos,
+    idempotencyKey: parsedBody.data.idempotencyKey,
+  });
   return NextResponse.json(result);
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { workspaceFetch } from "@/components/workspace-fetch";
 
 type TodoLine = {
   raw: string;
@@ -32,8 +33,6 @@ type TranscriptRecord = {
   createdAt: string;
 };
 
-const WORKSPACE_ID = "ws-demo";
-
 const exampleDraft = `[SUMMARY]\nWeekly planning sync\n[TIMELINE]\nTomorrow 10:00 budget review\n[TODOS]\nBook dentist|later|low|online|none|health|Malthe|2026-02-20|check slots\n[DECISIONS]\nKeep web MVP scope\n[MONEY]\nNo spend this week\n[IDEAS]\nAdd transcript templates\n[QUESTIONS]\nShould we add recurring chores now?`;
 
 export default function NewTranscriptPage() {
@@ -47,7 +46,7 @@ export default function NewTranscriptPage() {
   const [error, setError] = useState<string | null>(null);
 
   async function refreshRecent() {
-    const res = await fetch(`/api/transcripts?workspaceId=${WORKSPACE_ID}&limit=8`);
+    const res = await workspaceFetch(`/api/transcripts?limit=8`);
     const json = (await res.json()) as { transcripts: TranscriptRecord[] };
     setRecent(json.transcripts ?? []);
   }
@@ -59,11 +58,10 @@ export default function NewTranscriptPage() {
   async function createTranscriptIfNeeded() {
     if (transcriptId) return transcriptId;
 
-    const created = await fetch("/api/transcripts/create", {
+    const created = await workspaceFetch("/api/transcripts/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        workspaceId: WORKSPACE_ID,
         rawText: draft,
       }),
     });
@@ -106,7 +104,7 @@ export default function NewTranscriptPage() {
     setError(null);
 
     try {
-      const res = await fetch(`/api/transcripts/${id}?workspaceId=${WORKSPACE_ID}`);
+      const res = await workspaceFetch(`/api/transcripts/${id}`);
       if (!res.ok) throw new Error("Failed to load transcript");
 
       const json = (await res.json()) as {
@@ -133,11 +131,10 @@ export default function NewTranscriptPage() {
 
     setError(null);
 
-    const res = await fetch("/api/transcripts/commit-derived", {
+    const res = await workspaceFetch("/api/transcripts/commit-derived", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        workspaceId: WORKSPACE_ID,
         transcriptId,
         todos: result.todos,
       }),

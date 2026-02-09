@@ -1,6 +1,38 @@
 # Life OS MVP – Progress Status
 
-## Shipped in this run (2026-02-09)
+## Shipped in this run (2026-02-09, evening continuation)
+
+### 0) Operational surfaces MVP completion pass (todos/timeline/weekly plan)
+
+- Added **weekly plan API** with Monday-start validation:
+  - `GET /api/weekly-plan?weekStart=YYYY-MM-DD&limit=...`
+  - Validates ISO date format and enforces `weekStart` must be Monday (UTC)
+  - Returns workspace-scoped todos whose due dates fall inside `[weekStart, weekStart + 7d)`
+- Updated `/weekly-plan` page to use the weekly-plan API instead of client-only date filtering:
+  - defaults to current week Monday (UTC)
+  - surfaces API validation/loading errors
+  - shows active planning week in UI
+- Upgraded `/todos` from flat list to a **basic board** grouped by `horizon` columns (`now/next/later/someday`), giving an operational triage surface instead of only chronological output.
+- Kept `/timeline` as due-date ordered list and retained workspace-aware fetch flow.
+
+### 1) Repository abstraction wiring exercised via new operational API/tests
+
+- Weekly plan and todos operational surfaces now read via API handlers that resolve workspace from request context and call `getPersistenceRepository()` (local/supabase implementations stay swappable).
+- Expanded route integration coverage in `tests/routes.test.ts` to assert:
+  - `/api/todos` returns committed derived todos with expected fields
+  - `/api/weekly-plan` success path for Monday weekStart
+  - `/api/weekly-plan` validation failure for non-Monday input (400)
+
+### 2) Validation
+
+- `npm run lint` ✅
+- `npm run typecheck` ✅
+- `npm run test` ✅
+- `npm run build` ✅
+
+---
+
+## Previous shipped items (earlier in 2026-02-09)
 
 ### 0) Role-based write policy hardening (owner/member/viewer)
 
