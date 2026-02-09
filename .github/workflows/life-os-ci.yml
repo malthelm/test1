@@ -1,0 +1,31 @@
+name: life-os-ci
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "life-os/**"
+      - ".github/workflows/life-os-ci.yml"
+  pull_request:
+    paths:
+      - "life-os/**"
+      - ".github/workflows/life-os-ci.yml"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: life-os
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: life-os/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm run migration:check
