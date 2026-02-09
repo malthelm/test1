@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "migration:check": "echo 'migration check placeholder (Supabase migrations to be added in Phase 1)'",
+    "migration:check": "test -d supabase/migrations && ls -1 supabase/migrations/*.sql >/dev/null",
     "test": "tsx --test tests/**/*.test.ts"
   },
   "dependencies": {

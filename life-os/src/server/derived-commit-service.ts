@@ -1,20 +1,14 @@
 import crypto from "node:crypto";
 
 import { type ParsedTodoLine } from "@/lib/transcripts/parser";
-import { commitTodosAndAudit } from "@/server/local-db";
+import { getPersistenceRepository } from "@/server/repositories";
+import { type DerivedCommitResult } from "@/server/repositories/types";
 
 export type CommitRequest = {
   workspaceId: string;
   transcriptId: string;
   todos: ParsedTodoLine[];
   idempotencyKey?: string;
-};
-
-export type DerivedCommitResult = {
-  idempotencyKey: string;
-  committedTodos: number;
-  skippedTodos: number;
-  auditEventId: string;
 };
 
 export async function commitDerivedFromTranscript(
@@ -27,7 +21,8 @@ export async function commitDerivedFromTranscript(
       .update(`${req.workspaceId}:${req.transcriptId}:${JSON.stringify(req.todos)}`)
       .digest("hex");
 
-  return commitTodosAndAudit({
+  const repository = getPersistenceRepository();
+  return repository.commitTodosAndAudit({
     workspaceId: req.workspaceId,
     transcriptId: req.transcriptId,
     todos: req.todos,

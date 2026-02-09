@@ -5,10 +5,13 @@ import { POST as parsePost } from "@/app/api/transcripts/parse/route";
 import { POST as createPost } from "@/app/api/transcripts/create/route";
 import { POST as commitPost } from "@/app/api/transcripts/commit-derived/route";
 import { __resetLocalDbForTests } from "@/server/local-db";
+import { __resetRepositoryForTests } from "@/server/repositories";
 
 process.env.LIFE_OS_DB_FILE = "/tmp/life-os-test-db-routes.json";
+process.env.LIFE_OS_PERSISTENCE = "local";
 
 test("transcript create -> parse -> commit flow", async () => {
+  __resetRepositoryForTests();
   await __resetLocalDbForTests();
 
   const draft = `[SUMMARY]\nA\n[TIMELINE]\nB\n[TODOS]\nTask|later|low|online|none|ops|Malthe|2026-02-20|note\n[DECISIONS]\nC\n[MONEY]\nD\n[IDEAS]\nE\n[QUESTIONS]\nF`;
@@ -45,6 +48,27 @@ test("transcript create -> parse -> commit flow", async () => {
       headers: { "Content-Type": "application/json" },
     }),
   );
-  const committed = (await commitRes.json()) as { committedTodos: number };
+  const committed = (await commitRes.json()) as {
+    committedTodos: number;
+    idempotencyKey: string;
+    auditEventId: string;
+  };
   assert.equal(committed.committedTodos, 1);
+
+  const replayRes = await commitPost(
+    new Request("http://localhost/api/transcripts/commit-derived", {
+      method: "POST",
+      body: JSON.stringify({
+        workspaceId: "ws-test",
+        transcriptId: created.id,
+        todos: parsed.todos,
+        idempotencyKey: committed.idempotencyKey,
+      }),
+      headers: { "Content-Type": "application/json" },
+    }),
+  );
+
+  const replay = (await replayRes.json()) as { auditEventId: string; committedTodos: number };
+  assert.equal(replay.auditEventId, committed.auditEventId);
+  assert.equal(replay.committedTodos, 1);
 });
