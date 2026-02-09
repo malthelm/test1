@@ -1,0 +1,47 @@
+{
+  "tables": [
+    {
+      "name": "workspaces",
+      "select": "member",
+      "insert": "owner",
+      "update": "owner",
+      "delete": "owner"
+    },
+    {
+      "name": "workspace_memberships",
+      "select": "self_or_member",
+      "insert": "owner",
+      "update": "owner",
+      "delete": "owner"
+    },
+    {
+      "name": "transcripts",
+      "select": "member",
+      "insert": "member",
+      "update": "member",
+      "delete": "owner"
+    },
+    {
+      "name": "todos",
+      "select": "member",
+      "insert": "member",
+      "update": "member",
+      "delete": "owner"
+    },
+    {
+      "name": "audit_events",
+      "select": "member",
+      "insert": "system_or_member",
+      "update": "none",
+      "delete": "none"
+    },
+    {
+      "name": "idempotency_keys",
+      "select": "member",
+      "insert": "system_or_member",
+      "update": "none",
+      "delete": "none"
+    }
+  ],
+  "notes": "Starter matrix for future executable RLS tests (pgTAP/SQL harness)."
+}

@@ -185,7 +185,7 @@ export default function NewTranscriptPage() {
               <Button
                 variant="outline"
                 onClick={onCommitTodos}
-                disabled={!result || result.confidence.globalCritical || !transcriptId}
+                disabled={!result || result.todos.length === 0 || result.confidence.globalCritical || !transcriptId}
               >
                 Commit valid TODOs
               </Button>
@@ -209,23 +209,51 @@ export default function NewTranscriptPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <p className="text-xs text-neutral-600">
+                Commit readiness: {result.confidence.globalCritical ? "Blocked due to critical parser issues" : "Ready"}
+              </p>
               <div>
                 <h3 className="font-medium">Parsed TODOs ({result.todos.length})</h3>
-                <ul className="mt-2 list-disc pl-5 text-sm">
-                  {result.todos.map((t, i) => (
-                    <li key={`${t.fields.title}-${i}`}>{t.fields.title}</li>
-                  ))}
-                </ul>
+                {result.todos.length === 0 ? (
+                  <p className="mt-2 text-sm text-neutral-600">No TODO lines parsed from this draft.</p>
+                ) : (
+                  <div className="mt-2 overflow-x-auto">
+                    <table className="min-w-full text-left text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="px-2 py-1">Title</th>
+                          <th className="px-2 py-1">Due</th>
+                          <th className="px-2 py-1">Owner</th>
+                          <th className="px-2 py-1">Domain</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.todos.map((t, i) => (
+                          <tr key={`${t.fields.title}-${i}`} className="border-b last:border-0">
+                            <td className="px-2 py-1">{t.fields.title}</td>
+                            <td className="px-2 py-1">{t.fields.dueDate}</td>
+                            <td className="px-2 py-1">{t.fields.responsible}</td>
+                            <td className="px-2 py-1">{t.fields.domain}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
               <div>
                 <h3 className="font-medium">Issues ({result.issues.length})</h3>
-                <ul className="mt-2 list-disc pl-5 text-sm">
-                  {result.issues.map((issue, i) => (
-                    <li key={`${issue.code}-${i}`}>
-                      [{issue.code}] line {issue.line}: {issue.message}
-                    </li>
-                  ))}
-                </ul>
+                {result.issues.length === 0 ? (
+                  <p className="mt-2 text-sm text-green-700">No parser issues detected.</p>
+                ) : (
+                  <ul className="mt-2 list-disc pl-5 text-sm">
+                    {result.issues.map((issue, i) => (
+                      <li key={`${issue.code}-${i}`}>
+                        [{issue.code}] line {issue.line}: {issue.message}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </CardContent>
           </Card>

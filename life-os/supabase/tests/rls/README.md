@@ -7,3 +7,7 @@ Planned test groups:
 - workspace isolation
 - transcript/todo row access
 - idempotency key workspace isolation
+
+Starter artifacts:
+- `policy-matrix-starter.json` defines expected read/write roles per table.
+- `tests/migrations.test.ts` validates matrix/table coverage and policy/function markers.

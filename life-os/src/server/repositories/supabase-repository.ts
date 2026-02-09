@@ -149,6 +149,9 @@ export class SupabasePersistenceRepository implements PersistenceRepository {
   }
 
   async commitTodosAndAudit(params: CommitTodosParams): Promise<DerivedCommitResult> {
+    const existing = await this.getIdempotencyResult(params.idempotencyKey);
+    if (existing) return existing;
+
     const { data, error } = await this.supabase.rpc("commit_derived_from_transcript", {
       p_workspace_id: params.workspaceId,
       p_transcript_id: params.transcriptId,
@@ -162,6 +165,9 @@ export class SupabasePersistenceRepository implements PersistenceRepository {
     if (!row) {
       throw new Error("commit_derived_from_transcript returned no data");
     }
+
+    const canonical = await this.getIdempotencyResult(params.idempotencyKey);
+    if (canonical) return canonical;
 
     return {
       idempotencyKey: row.idempotency_key,
